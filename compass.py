@@ -7,7 +7,7 @@ from math import cos,sin,pi, atan2, floor, asin
 class Compass:
 
     MAGNETIC_NORTH = 0
-    BRISTOL = -2.2
+    BRISTOL = 0  #-2.2
     declinationAngle = BRISTOL / 1000
 
     #  Latitude: 51 degrees 28' 42.7" N
@@ -28,9 +28,9 @@ class Compass:
         # Read and render the raw compass readings, correcting by our manual calibration values
         compass = XLoBorg.ReadCompassRaw()
         print str(compass[0])+","+str(compass[1])+","+str(compass[2])
-        mX = compass[0]  # - -248
-        mY = compass[1]  #- 370
-        mZ = compass[2]  #- 1384
+        mX = compass[0] - 392.275
+        mY = compass[1] - 1014.4
+        mZ = compass[2] - 2218.6
         print "mX:"+str(mX)+",mY:"+str(mY)
 
         # Read the raw accelerometer readings
