@@ -1,2 +1,2 @@
-RPi.GPIO==0.6.3
-smbus-cffi==0.5.1
+RPi.GPIO
+smbus-cffi
