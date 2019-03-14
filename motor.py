@@ -34,3 +34,11 @@ def motors_off():
 
 
 setup_gpio()
+
+if __name__ == '__main__':
+    import time
+    for movement in (FORWARD, SPIN_LEFT, BACKWARD, SPIN_RIGHT):
+        motors_on(movement)
+        time.sleep(1)
+
+    motors_off()
