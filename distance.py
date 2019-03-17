@@ -58,10 +58,9 @@ if __name__ == '__main__':
     try:
         while True:
             distance_ahead = get_distance(DISTANCE_AHEAD)
-            print("Distance ahead: %.5f m" % distance_ahead)
             distance_astern = get_distance(DISTANCE_ASTERN)
-            print("Distance astern: %.5f m" % distance_astern)
-            print("Total_distance: %.5f m" % (distance_ahead + distance_astern))
+            print("Distances: ahead: %.5f m, astern: %.5f m, total %.5f m" % (
+                distance_ahead, distance_astern, (distance_ahead + distance_astern)))
 
     except KeyboardInterrupt:
         GPIO.cleanup()
