@@ -1,61 +1,69 @@
 import RPi.GPIO as GPIO
 import time
 
+
+ahead_pin_trigger = 17
+ahead_pin_echo = 18
+DISTANCE_AHEAD = (ahead_pin_trigger, ahead_pin_echo)
+astern_pin_trigger = 27
+astern_pin_echo = 22
+DISTANCE_ASTERN = (astern_pin_trigger, astern_pin_echo)
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-pin_trigger = 17
-pin_echo = 18
 
-HALF_A_SECOND = 0.5
+PRE_TRIGGER_DELAY = 0.05
 TEN_MICROSECONDS = 0.00001
 PING_DURATION = TEN_MICROSECONDS * 5.0
 SPEED_OF_SOUND = 343.26  # metres per second
-# I think that the adjustment factor needs to take into account
-# spread when we're calculating from the end of a sound pulse rather than the leading edge
-EXPERIMENTAL_ADJUSTMENT_FACTOR = 24.0 / 37.01#.0#60.0 / 285.0
 
-print "Ultrasonic measurement"
 
-GPIO.setup(pin_trigger, GPIO.OUT)
-GPIO.setup(pin_echo, GPIO.IN)
+GPIO.setup(ahead_pin_trigger, GPIO.OUT)
+GPIO.setup(astern_pin_trigger, GPIO.OUT)
+GPIO.setup(ahead_pin_echo, GPIO.IN)
+GPIO.setup(astern_pin_echo, GPIO.IN)
 
-try:
-    while True:
-        GPIO.output(pin_trigger, False)
-        time.sleep(HALF_A_SECOND)
 
-        echo_sensed = False
-        GPIO.output(pin_trigger, True)
+def get_distance(pins):
+    pin_trigger = pins[0]
+    pin_echo = pins[1]
+    GPIO.output(pin_trigger, False)
+    time.sleep(PRE_TRIGGER_DELAY)
+    GPIO.output(pin_trigger, True)
+    time.sleep(TEN_MICROSECONDS)
+    GPIO.output(pin_trigger, False)
+
+    start_time = time.time()
+
+    while GPIO.input(pin_echo) == 0:
         start_time = time.time()
-        # TODO this is all very well but it would be far better to trigger from the up rather than the down.
-        # TODO Echoes and wide spread reflection ae causing issues with close distances.
-        time.sleep(PING_DURATION)
-        GPIO.output(pin_trigger, False)
 
-        while not echo_sensed:
-            echo_sensed = GPIO.input(pin_echo)
+    stop_time = time.time()
+    while GPIO.input(pin_echo) == 1:
+        stop_time = time.time()
 
-        while echo_sensed:
-            echo_sensed = GPIO.input(pin_echo)
+    if stop_time - start_time >= 0.04:
+        print("Too close!")
 
-        finish_time = time.time()
+    round_trip_elapsed_time = stop_time - start_time
 
-        # correct start_time for the duration of the ping
-        start_time -= PING_DURATION
-        if finish_time - start_time >= 0.04:
-            print("Too close!")
-            finish_time = start_time
+    # round trip distance = speed of sound * elapsed time
+    round_trip_distance = round_trip_elapsed_time * SPEED_OF_SOUND
+    object_distance = round_trip_distance / 2
+    return object_distance
 
-        round_trip_elapsed_time = finish_time - start_time
 
-        # round trip distance = speed of sound * elapsed time
-        round_trip_distance = round_trip_elapsed_time * SPEED_OF_SOUND * EXPERIMENTAL_ADJUSTMENT_FACTOR
-        object_distance = round_trip_distance / 2
-        print("Distance: %.5f m" % object_distance)
-        time.sleep(HALF_A_SECOND * 2)
+if __name__ == '__main__':
+    try:
+        while True:
+            distance_ahead = get_distance(DISTANCE_AHEAD)
+            print("Distance ahead: %.5f m" % distance_ahead)
+            distance_astern = get_distance(DISTANCE_ASTERN)
+            print("Distance astern: %.5f m" % distance_astern)
+            print("Total_distance: %.5f m" % (distance_ahead + distance_astern))
 
-except KeyboardInterrupt:
-    GPIO.cleanup()
+    except KeyboardInterrupt:
+        GPIO.cleanup()
 
 
