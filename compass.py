@@ -20,6 +20,21 @@ class Compass:
         XLoBorg.Init()
         self.needle = XLoBorg
 
+
+
+    def get_compass_bearing(self):
+        raw = self.needle.ReadCompassRaw()
+         # get the heading in radians
+        heading = atan2(raw[1], raw[y])
+
+        # Correct negative values
+        if heading < 0:
+            heading = heading + (2 * pi)
+
+        # convert to degrees
+        return heading * 180 / pi
+
+
     def get_heading(self):
         #TODO I think I'm using the wrong x,y,z  fix that.
         # Read and render the raw compass readings, correcting by our manual calibration values
@@ -85,8 +100,10 @@ class Compass:
         return best_turn
 
 if __name__ == "__main__":
+
     compass = Compass()
+
     for _ in range(200):
-        compass.get_heading()
+        print ("Bearing: %s" % str(compass.get_compass_bearing())
         time.sleep(1)
 
