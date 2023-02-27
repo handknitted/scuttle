@@ -4,9 +4,11 @@ import time
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-pin_trigger = 17
-pin_echo = 18
+pin_trigger = 27
+pin_echo = 22
+pin_warning = 17
 
+WARNING_DISTANCE = 0.2
 HALF_A_SECOND = 0.5
 TEN_MICROSECONDS = 0.00001
 PING_DURATION = TEN_MICROSECONDS * 5.0
@@ -15,8 +17,9 @@ SPEED_OF_SOUND = 343.26  # metres per second
 # spread when we're calculating from the end of a sound pulse rather than the leading edge
 EXPERIMENTAL_ADJUSTMENT_FACTOR = 24.0 / 37.01#.0#60.0 / 285.0
 
-print "Ultrasonic measurement"
+print("Ultrasonic measurement")
 
+GPIO.setup(pin_warning, GPIO.OUT)
 GPIO.setup(pin_trigger, GPIO.OUT)
 GPIO.setup(pin_echo, GPIO.IN)
 
@@ -53,6 +56,10 @@ try:
         round_trip_distance = round_trip_elapsed_time * SPEED_OF_SOUND * EXPERIMENTAL_ADJUSTMENT_FACTOR
         object_distance = round_trip_distance / 2
         print("Distance: %.5f m" % object_distance)
+        if object_distance < WARNING_DISTANCE:
+            GPIO.output(17, True)
+        else:
+            GPIO.output(17, False)
         time.sleep(HALF_A_SECOND * 2)
 
 except KeyboardInterrupt:
