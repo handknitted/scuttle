@@ -36,7 +36,7 @@ try:
             # go straight
             new_movement = Movement.Forward
         else:
-            logging.info("Obstacle within %sm. Turning.")
+            logging.info("Obstacle within %sm. Turning." % minimum_distance)
             # try turning
             new_movement = Movement.SpinLeft
             motors_on(new_movement.value)
