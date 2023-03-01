@@ -40,7 +40,7 @@ def setup_gpio():
 
 def motors_on(movement):
     for index, pin in enumerate(PWM_PINS):
-        pin.changeDutyCycle(movement[index])
+        pin.ChangeDutyCycle(movement[index])
 
 
 def motors_off():
