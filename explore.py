@@ -1,6 +1,6 @@
 import atexit
 import logging
-
+import enum
 import mag3110
 from distance import DistanceSensor
 from motor import FORWARD, BACKWARD, SPIN_RIGHT, SPIN_LEFT, motors_on, motors_off
