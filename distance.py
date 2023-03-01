@@ -1,7 +1,7 @@
 import logging
 import RPi.GPIO as GPIO
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 logging.basicConfig(level=logging.INFO)
 GPIO.setmode(GPIO.BCM)
@@ -18,7 +18,7 @@ PING_DURATION = TEN_MICROSECONDS * 5.0
 SPEED_OF_SOUND = 343.26  # metres per second
 # I think that the adjustment factor needs to take into account
 # spread when we're calculating from the end of a sound pulse rather than the leading edge
-EXPERIMENTAL_ADJUSTMENT_FACTOR = 24.0 / 37.01#.0#60.0 / 285.0
+EXPERIMENTAL_ADJUSTMENT_FACTOR = 24.0 / 37.01  # .0#60.0 / 285.0
 
 logging.info("Ultrasonic measurement")
 
@@ -31,14 +31,13 @@ class DistanceSensor(object):
 
     def __init__(self, warning_distance=0.2):
         self.warning_distance = warning_distance
-        self.distance_datetime = datetime.now()
+        self.distance_datetime = datetime.now() - timedelta(seconds=1)
         self.current_distance = 10
 
     def get_distance(self):
         if ((datetime.now() - self.distance_datetime).total_seconds() * 1000) < 100:
             logging.info("Too soon to check distance, return None")
-            return None
-
+            raise CheckTooSoon()
 
         GPIO.output(pin_trigger, False)
         time.sleep(FIFTY_MILLISECONDS)
@@ -80,6 +79,14 @@ class DistanceSensor(object):
         self.distance_datetime = datetime.now()
         return object_distance
 
+    def is_clear_forward(self):
+        distance = self.get_distance()
+        return distance > self.warning_distance
+
+
+class CheckTooSoon(Exception):
+    pass
+
 
 if __name__ == '__main__':
     try:
@@ -91,5 +98,3 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
         GPIO.cleanup()
-
-
