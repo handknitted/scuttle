@@ -24,51 +24,57 @@ GPIO.setup(pin_trigger, GPIO.OUT)
 GPIO.setup(pin_echo, GPIO.IN)
 
 
-def get_distance():
+class DistanceSensor(object):
 
-        GPIO.output(pin_trigger, False)
-        time.sleep(HALF_A_SECOND)
+    def __init__(self, warning_distance=0.2):
+        self.warning_distance = warning_distance
 
-        echo_sensed = False
-        GPIO.output(pin_trigger, True)
-        start_time = time.time()
-        # TODO this is all very well but it would be far better to trigger from the up rather than the down.
-        # TODO Echoes and wide spread reflection ae causing issues with close distances.
-        time.sleep(PING_DURATION)
-        GPIO.output(pin_trigger, False)
+    def get_distance(self):
 
-        while not echo_sensed:
-            echo_sensed = GPIO.input(pin_echo)
+            GPIO.output(pin_trigger, False)
+            time.sleep(HALF_A_SECOND)
 
-        while echo_sensed:
-            echo_sensed = GPIO.input(pin_echo)
+            echo_sensed = False
+            GPIO.output(pin_trigger, True)
+            start_time = time.time()
+            # TODO this is all very well but it would be far better to trigger from the up rather than the down.
+            # TODO Echoes and wide spread reflection ae causing issues with close distances.
+            time.sleep(PING_DURATION)
+            GPIO.output(pin_trigger, False)
 
-        finish_time = time.time()
+            while not echo_sensed:
+                echo_sensed = GPIO.input(pin_echo)
 
-        # correct start_time for the duration of the ping
-        start_time -= PING_DURATION
-        if finish_time - start_time >= 0.04:
-            print("Too close!")
-            finish_time = start_time
+            while echo_sensed:
+                echo_sensed = GPIO.input(pin_echo)
 
-        round_trip_elapsed_time = finish_time - start_time
+            finish_time = time.time()
 
-        # round trip distance = speed of sound * elapsed time
-        round_trip_distance = round_trip_elapsed_time * SPEED_OF_SOUND * EXPERIMENTAL_ADJUSTMENT_FACTOR
-        object_distance = round_trip_distance / 2
-        print("Distance: %.5f m" % object_distance)
-        if object_distance < WARNING_DISTANCE:
-            GPIO.output(17, True)
-        else:
-            GPIO.output(17, False)
-        time.sleep(HALF_A_SECOND * 2)
-        return object_distance
+            # correct start_time for the duration of the ping
+            start_time -= PING_DURATION
+            if finish_time - start_time >= 0.04:
+                print("Too close!")
+                finish_time = start_time
+
+            round_trip_elapsed_time = finish_time - start_time
+
+            # round trip distance = speed of sound * elapsed time
+            round_trip_distance = round_trip_elapsed_time * SPEED_OF_SOUND * EXPERIMENTAL_ADJUSTMENT_FACTOR
+            object_distance = round_trip_distance / 2
+            print("Distance: %.5f m" % object_distance)
+            if object_distance < self.warning_distance:
+                GPIO.output(17, True)
+            else:
+                GPIO.output(17, False)
+            time.sleep(HALF_A_SECOND * 2)
+            return object_distance
 
 
 if __name__ == '__main__':
     try:
+        distance_sensor = DistanceSensor()
         while True:
-            distance_ahead = get_distance()
+            distance_ahead = distance_sensor.get_distance()
             print("Distances: ahead: %.5f m" % (
                 distance_ahead))
 
