@@ -1,6 +1,7 @@
 import logging
 import RPi.GPIO as GPIO
 import time
+from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
 GPIO.setmode(GPIO.BCM)
@@ -30,46 +31,54 @@ class DistanceSensor(object):
 
     def __init__(self, warning_distance=0.2):
         self.warning_distance = warning_distance
+        self.distance_datetime = datetime.now()
+        self.current_distance = 10
 
     def get_distance(self):
+        if ((datetime.now() - self.distance_datetime).total_seconds() * 1000) < 100:
+            logging.info("Too soon to check distance, return None")
+            return None
 
-            GPIO.output(pin_trigger, False)
-            time.sleep(FIFTY_MILLISECONDS)
 
-            echo_sensed = False
-            GPIO.output(pin_trigger, True)
-            start_time = time.time()
-            # TODO this is all very well but it would be far better to trigger from the up rather than the down.
-            # TODO Echoes and wide spread reflection ae causing issues with close distances.
-            time.sleep(PING_DURATION)
-            GPIO.output(pin_trigger, False)
+        GPIO.output(pin_trigger, False)
+        time.sleep(FIFTY_MILLISECONDS)
 
-            while not echo_sensed:
-                echo_sensed = GPIO.input(pin_echo)
+        echo_sensed = False
+        GPIO.output(pin_trigger, True)
+        start_time = time.time()
+        # TODO this is all very well but it would be far better to trigger from the up rather than the down.
+        # TODO Echoes and wide spread reflection ae causing issues with close distances.
+        time.sleep(PING_DURATION)
+        GPIO.output(pin_trigger, False)
 
-            while echo_sensed:
-                echo_sensed = GPIO.input(pin_echo)
+        while not echo_sensed:
+            echo_sensed = GPIO.input(pin_echo)
 
-            finish_time = time.time()
+        while echo_sensed:
+            echo_sensed = GPIO.input(pin_echo)
 
-            # correct start_time for the duration of the ping
-            start_time -= PING_DURATION
-            if finish_time - start_time >= 0.04:
-                logging.info("Too close!")
-                finish_time = start_time
+        finish_time = time.time()
 
-            round_trip_elapsed_time = finish_time - start_time
+        # correct start_time for the duration of the ping
+        start_time -= PING_DURATION
+        if finish_time - start_time >= 0.04:
+            logging.info("Too close!")
+            finish_time = start_time
 
-            # round trip distance = speed of sound * elapsed time
-            round_trip_distance = round_trip_elapsed_time * SPEED_OF_SOUND * EXPERIMENTAL_ADJUSTMENT_FACTOR
-            object_distance = round_trip_distance / 2
-            logging.info("Distance: %.5f m" % object_distance)
-            if object_distance < self.warning_distance:
-                GPIO.output(17, True)
-            else:
-                GPIO.output(17, False)
-            time.sleep(FIFTY_MILLISECONDS)
-            return object_distance
+        round_trip_elapsed_time = finish_time - start_time
+
+        # round trip distance = speed of sound * elapsed time
+        round_trip_distance = round_trip_elapsed_time * SPEED_OF_SOUND * EXPERIMENTAL_ADJUSTMENT_FACTOR
+        object_distance = round_trip_distance / 2
+        logging.info("Distance: %.5f m" % object_distance)
+        if object_distance < self.warning_distance:
+            GPIO.output(17, True)
+        else:
+            GPIO.output(17, False)
+        time.sleep(FIFTY_MILLISECONDS)
+        # reset the datetime so we know when the next 'slot' is viable
+        self.distance_datetime = datetime.now()
+        return object_distance
 
 
 if __name__ == '__main__':
