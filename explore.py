@@ -35,16 +35,14 @@ try:
             logging.info("Clear forward")
             # go straight
             new_movement = Movement.Forward
-            motors_on(FORWARD)
         else:
             logging.info("Obstacle within %sm. Turning.")
             # try turning
             new_movement = Movement.SpinLeft
-            motors_on(SPIN_LEFT)
+            motors_on(new_movement.value)
 
         if current_movement != new_movement:
-            motors_on(new_movement)
-            current_movement = new_movement
+            motors_on(new_movement.value)
 except KeyboardInterrupt:
 
     motors_off()
