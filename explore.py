@@ -1,12 +1,12 @@
 import atexit
 import logging
-import enum
+from enum import Enum
 import mag3110
 from distance import DistanceSensor
 from motor import FORWARD, BACKWARD, SPIN_RIGHT, SPIN_LEFT, motors_on, motors_off
 
 
-class Movement(enum):
+class Movement(Enum):
 
     Forward = FORWARD
     Backward = BACKWARD
