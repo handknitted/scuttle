@@ -11,7 +11,7 @@ pin_echo = 22
 pin_warning = 17
 
 WARNING_DISTANCE = 0.2
-TEN_MILLISECONDS = 0.010
+FIFTY_MILLISECONDS = 0.05
 TEN_MICROSECONDS = 0.00001
 PING_DURATION = TEN_MICROSECONDS * 5.0
 SPEED_OF_SOUND = 343.26  # metres per second
@@ -34,7 +34,7 @@ class DistanceSensor(object):
     def get_distance(self):
 
             GPIO.output(pin_trigger, False)
-            time.sleep(TEN_MILLISECONDS)
+            time.sleep(FIFTY_MILLISECONDS)
 
             echo_sensed = False
             GPIO.output(pin_trigger, True)
@@ -68,7 +68,7 @@ class DistanceSensor(object):
                 GPIO.output(17, True)
             else:
                 GPIO.output(17, False)
-            time.sleep(TEN_MILLISECONDS)
+            time.sleep(FIFTY_MILLISECONDS)
             return object_distance
 
 
