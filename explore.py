@@ -2,7 +2,7 @@ import atexit
 import logging
 
 import mag3110
-from distance import get_distance
+from distance import DistanceSensor
 from motor import FORWARD, BACKWARD, SPIN_RIGHT, SPIN_LEFT, motors_on, motors_off
 
 
@@ -18,9 +18,11 @@ logging.basicConfig(level=logging.INFO)
 
 minimum_distance = 0.3
 
+distance_sensor = DistanceSensor(warning_distance=minimum_distance)
+
 
 def is_clear_forward():
-    return get_distance() > minimum_distance
+    return distance_sensor.get_distance() > minimum_distance
 
 
 try:
