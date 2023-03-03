@@ -54,7 +54,7 @@ class ScuttleMotors(Motors):
         if self.old_movement is None:
             for index, pin in enumerate(self.PWM_PINS):
                 duty_cycle = move[index]
-                pin.ChangeDutyCycle()
+                pin.ChangeDutyCycle(duty_cycle)
                 logging.info('Setting pin %s from to duty cycle %s' %
                              (str(index), str(duty_cycle)))
 
