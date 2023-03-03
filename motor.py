@@ -61,6 +61,7 @@ class ScuttleMotors(Motors):
                 thread.start()
             for thread in running_threads:
                 thread.join()
+        self.old_movement = move
 
     @staticmethod
     def change_duty_cycle(pin, old_duy_cycle, new_duty_cycle):
@@ -100,4 +101,4 @@ if __name__ == '__main__':
                      scuttle.spin_right,
                      scuttle.stop):
         movement()
-        time.sleep(1)
+        time.sleep(5)
