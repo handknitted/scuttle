@@ -87,15 +87,19 @@ class ScuttleMotors(Motors):
         logging.info("Duty cycle finished at %s" % str(old_duty_cycle))
 
     def forward(self):
+        logging.info('Forward')
         self.motors_change(self.FORWARD)
 
     def backward(self):
+        logging.info('Backward')
         self.motors_change(self.BACKWARD)
 
     def spin_left(self):
+        logging.info('Spin left')
         self.motors_change(self.SPIN_LEFT)
 
     def spin_right(self):
+        logging.info('Spin right')
         self.motors_change(self.SPIN_RIGHT)
 
     def stop(self):
