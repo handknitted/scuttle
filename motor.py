@@ -53,12 +53,15 @@ class ScuttleMotors(Motors):
         # if we have no old movement then just start
         if self.old_movement is None:
             for index, pin in enumerate(self.PWM_PINS):
-                pin.ChangeDutyCycle(move[index])
+                duty_cycle = move[index]
+                pin.ChangeDutyCycle()
+                logging.info('Setting pin %s from to duty cycle %s' %
+                             (str(index), str(duty_cycle)))
+
         else:
             # otherwise create threads to change the duty cycle smoothly
             running_threads = []
             for index, pin in enumerate(self.PWM_PINS):
-                pass
                 # create a thread for each pin to transition from old duty cycle to new duty cycle
                 old_duty_cycle = self.old_movement[index]
                 new_duty_cycle = move[index]
