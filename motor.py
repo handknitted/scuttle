@@ -1,5 +1,10 @@
+import logging
+
 import RPi.GPIO as GPIO
 from threading import Thread
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Motors(object):
@@ -56,6 +61,7 @@ class ScuttleMotors(Motors):
                 # create a thread for each pin to transition from old duty cycle to new duty cycle
                 old_duty_cycle = self.old_movement[index]
                 new_duty_cycle = move[index]
+                logging.info('Transitioning from duty cycle %s to %s' % (str(old_duty_cycle), str(new_duty_cycle)))
                 thread = Thread(target=self.change_duty_cycle, args=[pin, old_duty_cycle, new_duty_cycle])
                 running_threads.append(thread)
                 thread.start()
