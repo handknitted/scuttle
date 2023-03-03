@@ -46,6 +46,7 @@ class ScuttleMotors(Motors):
             GPIO.setup(pin, GPIO.OUT)
             pwm_pin = GPIO.PWM(pin, frequency)
             pwm_pin.start(stop)
+
             self.PWM_PINS.append(pwm_pin)
 
     def motors_change(self, move):
@@ -62,7 +63,7 @@ class ScuttleMotors(Motors):
                 old_duty_cycle = self.old_movement[index]
                 new_duty_cycle = move[index]
                 logging.info('Transitioning pin %s from duty cycle %s to %s' %
-                             (str(pin), str(old_duty_cycle), str(new_duty_cycle)))
+                             (str(index), str(old_duty_cycle), str(new_duty_cycle)))
                 thread = Thread(target=self.change_duty_cycle, args=[pin, old_duty_cycle, new_duty_cycle])
                 running_threads.append(thread)
                 thread.start()
@@ -71,17 +72,19 @@ class ScuttleMotors(Motors):
         self.old_movement = move
 
     @staticmethod
-    def change_duty_cycle(pin, old_duy_cycle, new_duty_cycle):
+    def change_duty_cycle(pin, old_duty_cycle, new_duty_cycle):
         steps = 10
         # establish the difference in the duty cycles
-        transition_size = new_duty_cycle - old_duy_cycle
+        transition_size = new_duty_cycle - old_duty_cycle
         step_size = transition_size/steps
+        logging.info("Step size: %s" % str(step_size))
         # loop with a delay, stepping the duty cycle toward the new value evenly
         while steps > 0:
             steps -= 1
-            old_duy_cycle += step_size
-            pin.ChangeDutyCycle(old_duy_cycle)
+            old_duty_cycle += step_size
+            pin.ChangeDutyCycle(old_duty_cycle)
             time.sleep(0.01)
+        logging.info("Duty cycle finished at %s" % str(old_duty_cycle))
 
     def forward(self):
         self.motors_change(self.FORWARD)
